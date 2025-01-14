@@ -132,4 +132,69 @@ st.markdown("""
     This app utilizes a **Random Forest** model for predicting stock prices, which is just one approach to financial forecasting.  
     - **Do not** rely solely on this tool for making financial decisions without understanding the market deeply.  
     - Stock markets are unpredictable, and no model can guarantee future prices accurately. 
+       
+    _I, Agus Raju Thaliyan, am not responsible for any financial losses incurred by using this app. This is simply a predictive tool meant for learning and exploratory purposes._
 """)
+
+# Footer section with responsive centering
+st.markdown("""
+    <style>
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #ffffff;
+        padding: 10px 0;
+        font-family: 'Arial', sans-serif;
+        font-size: 14px;
+        color: #4d4d4d;
+        border-top: 1px solid #eaeaea;
+        display: flex;
+        justify-content: center;  /* Center horizontally */
+        align-items: center;      /* Center vertically */
+        z-index: 1000;            /* Ensure it is above other elements */
+    }
+    .footer-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 1200px;        /* Adjust width to ensure content is not too wide */
+        margin: 0 auto;
+    }
+    .footer a {
+        color: #0073b1;  /* LinkedIn color */
+        text-decoration: none;
+        font-weight: bold;
+        margin: 0 10px;
+    }
+    .footer a:hover {
+        text-decoration: underline;
+    }
+    .footer p {
+        margin: 0;
+    }
+    /* Adjust footer alignment based on screen width */
+    @media (min-width: 1200px) {
+        .footer {
+            padding-left: 250px; /* Adjust based on sidebar width */
+            padding-right: 250px; /* Adjust based on sidebar width */
+        }
+    }
+    @media (max-width: 1199px) {
+        .footer {
+            padding-left: 0;
+            padding-right: 0;
+        }
+    }
+    </style>
+    <div class="footer">
+        <div class="footer-content">
+            <p><b>Made with ❤️ by Agus Raju Thaliyan</b></p>
+            <p>
+                <a href="https://www.linkedin.com/in/agusrajuthaliyan" target="_blank">LinkedIn</a> | 
+                <a href="mailto:agusraju43@gmail.com">agusraju43@gmail.com</a>
+            </p>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
