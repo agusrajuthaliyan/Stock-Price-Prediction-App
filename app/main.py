@@ -1,4 +1,5 @@
 import streamlit as st
+import numpy as np
 import pandas as pd
 from data_loader import load_data, validate_date
 from model import load_model, predict_price, train_and_save_model, evaluate_model, train_test_split
@@ -26,6 +27,13 @@ with st.sidebar:
 with st.spinner("Fetching stock data..."):
     hist = load_data(stock_ticker, start_date, end_date)
 
+    # Flatten the data to ensure 1D format
+    hist['Open'] = hist['Open'].values.flatten()
+    hist['Close'] = hist['Close'].values.flatten()
+    hist['Volume'] = hist['Volume'].values.flatten()
+    hist['High'] = hist['High'].values.flatten()
+    hist['Low'] = hist['Low'].values.flatten()
+
 if not hist.empty:
     st.success("Data successfully loaded!")
     st.write(f"Displaying data for: **{stock_ticker}**")
@@ -36,10 +44,10 @@ if not hist.empty:
 
     # Display historical data
     st.write("**Filtered Historical Data** (sorted by Date)")
-    st.dataframe(hist.sort_values(by='Date'))
+    st.dataframe(hist.sort_index())  # Sort by index instead of 'Date'
 
     # Model training and evaluation
-    X = hist.drop(columns=['Date', 'Close', 'Adj Close'])
+    X = hist.drop(columns=['Close'])  # Removed 'Adj Close' from drop
     y = hist['Close']
 
     regressor = load_model(stock_ticker)
@@ -49,43 +57,22 @@ if not hist.empty:
         # If the model is loaded, we need to create X_test and y_test for evaluation
         _, X_test, _, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+    # # Check the size of the test set
+    # st.write(f"Test set size: {X_test.shape[0]} data points")
+
     # Evaluate the model
     mse, rmse, mae, y_pred = evaluate_model(regressor, X_test, y_test)
 
-    # Display model performance metrics
-    st.subheader("Model Performance Metrics")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Mean Squared Error (MSE)", f"{mse:.4f}")
-    with col2:
-        st.metric("Root Mean Squared Error (RMSE)", f"{rmse:.4f}")
-    with col3:
-        st.metric("Mean Absolute Error (MAE)", f"{mae:.4f}")
+    # # Log the contents of y_test and y_pred
+    # st.write(f"y_test: {y_test.values}")
+    # st.write(f"y_pred: {y_pred}")
 
-    # # Understanding MSE and Feedback
-    # st.subheader("Understanding the Evaluation Metric (MSE)")
-    # st.write("""
-    # Mean Squared Error (MSE) is a metric that tells us how far off our model's predictions are from the actual values.
-    # A lower MSE value indicates better accuracy, as it means the predicted stock prices are closer to the real prices.
+    # Plot model performance with flattened y_test
+    plot_model_performance(y_test.to_numpy().flatten(), y_pred)
 
-    # - **MSE measures the average squared difference between predicted values and actual values.**
-    # - The closer MSE is to zero, the better the model's performance.
-
-    # While a low MSE suggests that the model is performing well, it's important to keep in mind that no model is perfect,
-    # especially in highly volatile areas like stock market prediction. This model should be used as a guide, not as a foolproof prediction tool.
-    # """)
-
-    # # Dynamic feedback based on MSE value
-    # if mse < 10:
-    #     st.success("The model's performance is quite good! The MSE is low, meaning the model predictions are fairly close to actual values. You can rely on this model for general guidance.")
-    # elif mse < 50:
-    #     st.warning("The model is somewhat accurate but shows room for improvement. It’s best to treat the predictions cautiously, especially during market fluctuations.")
-    # else:
-    #     st.error("The model’s performance is not optimal. The high MSE indicates large errors in predictions. It might not be safe to rely heavily on this model for decision-making.")
-
-        # Understanding MSE and Feedback
+    # Understanding MSE and Feedback
     with st.expander("Understanding the Evaluation Metric (MSE)", expanded=False):
-        st.markdown("""
+        st.markdown(""" 
         **Mean Squared Error (MSE)** is a key metric that helps evaluate the performance of the prediction model.
 
         - MSE measures the **average squared difference** between the actual and predicted values.
@@ -95,7 +82,7 @@ if not hist.empty:
         - **MSE ≈ 0**: Excellent model performance, predictions are highly accurate.
         - **MSE > 50**: The model struggles with accurate predictions, especially in volatile markets.
         
-        > _Note: Even a low MSE cannot fully guarantee perfect predictions in stock markets due to inherent volatility._
+        > _Note: Even a low MSE cannot fully guarantee perfect predictions in stock markets due to inherent volatility._ 
         """)
 
     # Dynamic feedback based on MSE value
@@ -110,9 +97,15 @@ if not hist.empty:
         else:
             st.error("❌ The model's MSE is **high**, indicating large errors in predictions. It's not safe to rely heavily on this model.")
 
-
-    # Plot model performance
-    plot_model_performance(y_test, y_pred)
+    # Display model performance metrics
+    st.subheader("Model Performance Metrics")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Mean Squared Error (MSE)", f"{mse:.4f}")
+    with col2:
+        st.metric("Root Mean Squared Error (RMSE)", f"{rmse:.4f}")
+    with col3:
+        st.metric("Mean Absolute Error (MAE)", f"{mae:.4f}")
 
     # Prediction inputs
     with st.sidebar:
@@ -127,86 +120,16 @@ if not hist.empty:
         if all([open_price, high_price, low_price, volume]):
             prediction = predict_price(regressor, open_price, high_price, low_price, volume)
             st.subheader(f"Predicted Closing Price for {stock_ticker}: {prediction:.2f}")
-
-            # Model performance
-            y_pred = regressor.predict(X)
-            plot_model_performance(y, y_pred)
         else:
             st.error("Please enter valid values for all inputs.")
 else:
     st.error(f"Unable to load data for {stock_ticker}. Please check the ticker symbol.")
 
 # Add a disclaimer note
-st.markdown("""
-    ---
+st.markdown(""" 
+    --- 
     **Important Note:**  
     This app utilizes a **Random Forest** model for predicting stock prices, which is just one approach to financial forecasting.  
     - **Do not** rely solely on this tool for making financial decisions without understanding the market deeply.  
-    - Stock markets are unpredictable, and no model can guarantee future prices accurately.
-    
-    _I, Agus Raju Thaliyan, am not responsible for any financial losses incurred by using this app. This is simply a predictive tool meant for learning and exploratory purposes._
+    - Stock markets are unpredictable, and no model can guarantee future prices accurately. 
 """)
-
-# Footer section with responsive centering
-st.markdown("""
-    <style>
-    .footer {
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        background-color: #ffffff;
-        padding: 10px 0;
-        font-family: 'Arial', sans-serif;
-        font-size: 14px;
-        color: #4d4d4d;
-        border-top: 1px solid #eaeaea;
-        display: flex;
-        justify-content: center;  /* Center horizontally */
-        align-items: center;      /* Center vertically */
-        z-index: 1000;            /* Ensure it is above other elements */
-    }
-    .footer-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        max-width: 1200px;        /* Adjust width to ensure content is not too wide */
-        margin: 0 auto;
-    }
-    .footer a {
-        color: #0073b1;  /* LinkedIn color */
-        text-decoration: none;
-        font-weight: bold;
-        margin: 0 10px;
-    }
-    .footer a:hover {
-        text-decoration: underline;
-    }
-    .footer p {
-        margin: 0;
-    }
-
-    /* Adjust footer alignment based on screen width */
-    @media (min-width: 1200px) {
-        .footer {
-            padding-left: 250px; /* Adjust based on sidebar width */
-            padding-right: 250px; /* Adjust based on sidebar width */
-        }
-    }
-    @media (max-width: 1199px) {
-        .footer {
-            padding-left: 0;
-            padding-right: 0;
-        }
-    }
-    </style>
-    <div class="footer">
-        <div class="footer-content">
-            <p><b>Made with ❤️ by Agus Raju Thaliyan</b></p>
-            <p>
-                <a href="https://www.linkedin.com/in/agusrajuthaliyan" target="_blank">LinkedIn</a> | 
-                <a href="mailto:agusraju43@gmail.com">agusraju43@gmail.com</a>
-            </p>
-        </div>
-    </div>
-""", unsafe_allow_html=True)

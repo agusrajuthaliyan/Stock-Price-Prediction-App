@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
@@ -5,10 +6,10 @@ import plotly.graph_objects as go
 def plot_stock_price(data, stock_ticker):
     fig = px.line(
         data,
-        x='Date',
-        y='Close',
+        x=data.index,  # Use the index for the x-axis
+        y=data['Close'].values.flatten(),  # Ensure 'Close' is 1D
         title=f"{stock_ticker} Closing Price Over Time",
-        range_x=[data['Date'].min(), data['Date'].max()],
+        range_x=[data.index.min(), data.index.max()],  # Adjust range to use index
     )
     return fig
 
