@@ -13,7 +13,7 @@ This Streamlit app uses a Random Forest model to predict stock prices based on h
 
 1. Clone this repository:
    ```
-   git clone https://github.com/agusrajuthaliyan/Stock-Prediction-App.git
+   git clone https://github.com/agusrajuthaliyan/Stock-Price-Prediction-App.git
    cd stock-market-prediction
    ```
 
