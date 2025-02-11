@@ -1,6 +1,8 @@
-streamlit==1.24.0
-pandas==1.5.3
-yfinance==0.2.18
-scikit-learn==1.2.2
-plotly==5.14.1
-joblib==1.2.0
+streamlit
+pandas
+numpy
+scikit-learn
+yfinance
+matplotlib
+seaborn
+plotly
