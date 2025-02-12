@@ -3,10 +3,10 @@
 This Streamlit app uses a Random Forest model to predict stock prices based on historical data.
 
 ## Home Interface
-![](src\Home.png)
+![](src/Home.png)
 
 ## Actual v/s Prediction Values
-![](src\actualVSpred.png)
+![](src/actualVSpred.png)
 ## Features
 
 - Fetch and display historical stock data
