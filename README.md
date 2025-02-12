@@ -1,7 +1,12 @@
-# Stock Market Prediction App
+# Stock Market Prediction App🚀
 
 This Streamlit app uses a Random Forest model to predict stock prices based on historical data.
 
+## Home Interface
+![](src\Home.png)
+
+## Actual v/s Prediction Values
+![](src\actualVSpred.png)
 ## Features
 
 - Fetch and display historical stock data
