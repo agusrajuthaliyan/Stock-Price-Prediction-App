@@ -1,6 +1,6 @@
 # Stock Market Prediction App🚀
 
-This Streamlit app uses a Random Forest model to predict stock prices based on historical data.
+This Streamlit app uses a Random Forest model to predict stock prices based on historical data. The model predicts this by using the open price, high and low prices of the particular stock data as the predictor variables.
 
 ## Home Interface
 ![](src/Home.png)
@@ -19,7 +19,6 @@ This Streamlit app uses a Random Forest model to predict stock prices based on h
 1. Clone this repository:
    ```
    git clone https://github.com/agusrajuthaliyan/Stock-Price-Prediction-App.git
-   cd stock-market-prediction
    ```
 
 2. Install the required packages:
