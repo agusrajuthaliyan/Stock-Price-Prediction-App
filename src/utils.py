@@ -29,7 +29,6 @@ def validate_ticker(ticker):
         return ""
     # Relaxed validation: just check not empty. Let yfinance handle validity.
     return ticker.strip().upper()
-    return ticker.upper()
 
 def validate_numeric_input(value, name):
     if value <= 0:

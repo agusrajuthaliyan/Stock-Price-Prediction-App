@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from datetime import timedelta
-from data_loader import load_data
-from model import train_and_save_model, load_model, predict_future  # Updated imports
-# Note: utils might need update or just use standard plotly here
+from src.data_loader import load_data
+from src.model import train_and_save_model, load_model, predict_future
+from src.utils import validate_ticker
 
 # Page Config
 st.set_page_config(
@@ -57,11 +57,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-from utils import validate_ticker
-
 # Sidebar
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/2910/2910312.png", width=50)
+    st.image("assets/Home.png" if pd.io.common.file_exists("assets/Home.png") else "https://cdn-icons-png.flaticon.com/512/2910/2910312.png", width=50)
     st.title("Settings")
     
     # Stock Ticker Input
@@ -108,9 +106,6 @@ should_retrain = st.session_state.get('force_retrain', False) or (model_data is 
 if should_retrain:
     with st.spinner("Training model... This usually takes a few seconds."):
         # Train
-        # Note: train_and_save_model returns (model, X_test, y_test, predictions)
-        # But we need to update the logic to return validation metrics too if we want to show them
-        # Let's just assume it saves the model and we reload it or use returns
         try:
              # Just call the function, it saves to disk
              # We need to pass the *raw* dataframe to create features
@@ -128,51 +123,18 @@ c1, c2, c3 = st.columns(3)
 if model_data and 'mse' in model_data:
     c1.metric("RMSE (Root Mean Sq Error)", f"${model_data['rmse']:.2f}")
     c2.metric("MAE (Mean Abs Error)", f"${model_data['mae']:.2f}")
-    # c3.metric("R2 Score", f"{model_data.get('r2', 'N/A')}")
 else:
     st.warning("Metrics not available.")
-
-# --- Comparison Plot ---
-# We want to see Actual vs Predicted on the test set
-# The test set was the last 20% of data.
-# We can re-generate predictions for the whole dataset slightly inefficiently to show full chart
-# OR just show the test set.
-# Let's show the test set predictions if available
-if 'last_data' in model_data:
-    # We can try to align predictions.
-    # ideally we should store 'predictions' and 'y_test' dates in model_data, but we didn't.
-    # Let's just create a new plot of the provided dataframe 'df' and overlay predictions if possible.
-    # For now, just show the history.
-    pass
 
 # --- Forecasting ---
 st.subheader(f"Future Forecast ({forecast_days} Days)")
 
 if model_data:
-    # Use the loaded model and last known data to predict future
-    # We need the model object. It is in model_data['model']
     model = model_data['model']
-    # We need last_data from the *current* dataframe 'df' to be up to date!
-    # If the user opened the app today, 'df' includes today.
-    # If the model was trained a month ago, 'last_data' in model_data is old.
-    # CRITICAL FIX: We should use the *current* df as the basis for prediction, 
-    # even if the model was trained on slightly older data (parameters are still valid).
-    # But new data might have different range? XGBoost needs features. 
-    # Create features for current df
     
     with st.spinner("Generating Forecast..."):
         # We need to construct the input for predict_future
-        # It expects a dataframe with 'Close' and index
-        # We use the FULL current dataframe 'df'
-        
-        # We need to ensure we have the feature columns list
-        # We saved it in 'features'
         feature_names = model_data.get('features', [])
-        
-        # We can unfortunately not easily pass 'features' list to predict_future inside main.py
-        # because predict_future is in model.py and re-derives columns.
-        # Let's assume the feature logic is stable.
-        
         future_df = predict_future(model, df, days=forecast_days)
         
     # Plotting
